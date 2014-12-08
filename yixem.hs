@@ -14,7 +14,6 @@ main = getArgs >>= \x ->
 	  case parserX y of
 		Right v -> typecheck v >>= \y ->
 		    when y $ do
-			  putStrLn "-------------------------------"
 			  putStrLn ("# file: "++x)
 			  putStrLn (compile v)
 		Left  x -> putStrLn "Error parsing file" >> putStrLn x
