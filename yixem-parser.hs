@@ -9,10 +9,10 @@ bnfc [lbnf|
 antiquote "[" ":" ":]";
 
 LV.   Vars ::= Ident ;
-EV.   Vars ::= Ident " " Vars ;
+EV.   Vars ::= Ident "," Vars ;
 
 SVar.  Stm ::= "let" Ident "=" Expr ";";
-SFun.  Stm ::= "fun" Ident  Vars "=" Expr ";";
+SFun.  Stm ::= "fun" Ident  "(" Vars ")" "=" Expr ";";
 
 [].       [Stm]    ::= ;
 (:).      [Stm]    ::= Stm [Stm];
@@ -32,7 +32,7 @@ VTrue.  VBool ::= "#t";
 VFalse. VBool ::= "#f";
 
 LE.   ExLst ::= Expr ;
-EE.   ExLst ::= Expr " " ExLst ;
+EE.   ExLst ::= Expr "," ExLst ;
 
 
 

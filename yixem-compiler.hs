@@ -1,7 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Yixem.Compiler (
-  compile
+  compile,
+  exLst,
+  vrLst
 ) where
 
 import Yixem.Parser
@@ -11,6 +13,15 @@ import Control.Monad.State.Strict
 import Data.List
 
 data Vs = Vs [(String,Reg)]
+
+exLst :: ExLst -> [Expr]
+exLst (LE x) = [x]
+exLst (EE x xs) = x:exLst xs
+
+vrLst :: Vars -> [String]
+vrLst (LV (Ident x)) = [x]
+vrLst (EV (Ident x) xs) = x:vrLst xs
+
 
 instance Show Vs where
   show (Vs x) = show $ map (\(a,(Reg b)) -> (a, b)) x
@@ -41,14 +52,6 @@ getenv (Function (m,f) xs) str =
        
 ----------------------------------------------------------
 
-v :: Vars -> [String]
-v (LV (Ident x)) = [x]
-v (EV (Ident x) xs) = x:v xs
-
-ag :: ExLst -> [Expr]
-ag (LE x) = [x]
-ag (EE x xs) = x:ag xs
- 
  
  
 cpProgram :: Program -> State Vs DC
@@ -65,7 +68,7 @@ cpStm m (SVar (Ident x) expr) = do
   body <- cpExpr 0 namespace expr
   return $ SvExpr fun body
 cpStm m (SFun (Ident x) vx expr) = do
-  let vs = v vx
+  let vs = vrLst vx
   let namespace = Function (m,x) vs
   fun <- getenv namespace x
   _ <- mapM_ (getenv namespace) vs
@@ -111,7 +114,7 @@ cpExpr n namespace xpr =
 	 c <- cpExpr (n+1) namespace e3
 	 return $ dcif reg (CEqu a (Int 1)) b c
        ECall (Ident x) els -> do
-	 let xs = ag els
+	 let xs = exLst els
 	 case x of
 	    "println" ->
 	      case xs of

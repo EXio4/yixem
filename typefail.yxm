@@ -1,0 +1,5 @@
+module Test where
+
+fun wrong(x,y) = if x then y+x else x;
+
+let main = 2+#t;
