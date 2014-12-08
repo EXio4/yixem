@@ -1,11 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Main where
+module Yixem.Compiler (
+  compile
+) where
 
-import Yixem
-import YixemL
+import Yixem.Parser
+import Yixem.CoreLang
 
-import System.Environment
 import Control.Monad.State.Strict
 import Data.List
 
@@ -30,12 +31,6 @@ varx str = do
 
 ----------------------------------------------------------
 
-inscope :: MonadState Vs m => String -> m Bool
-inscope str = do
-  Vs elements <- get
-  return $ maybe False (const True) $ lookup str elements
-  
- 
 data Fun = Function (String,String) [String]
 
 getenv :: MonadState Vs m => Fun -> String -> m Reg
@@ -134,13 +129,4 @@ cpExpr n namespace xpr =
 	      
 compile :: Program -> String
 compile p = c_dc (evalState (cpProgram p) (Vs []))
-	      
-	     
-main :: IO ()
-main = getArgs >>= \x ->
-  case x of
-       [x] -> readFile x >>= \y ->
-	  case parserX y of
-		Right v -> putStrLn ("# file: "++x) >> putStrLn (compile v)
-		Left  x -> putStrLn "Error parsing file" >> putStrLn x
-       _   -> putStrLn "give it exactly one param (the file to compile)"
+	   

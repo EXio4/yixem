@@ -1,8 +1,12 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell #-}
-
-module YixemL where
-
-import Yixem
+module Yixem.CoreLang
+  (
+    Cond(..),
+    DC(..),
+    Reg(..),
+    Opt(..),
+    dcif,
+    c_dc
+  )where
 
 data Opt = Plus | Minus | Mult deriving (Show,Eq)
 data Reg = Reg Char deriving (Show,Eq)
@@ -15,6 +19,7 @@ data Cond =
   | CGt  DC DC
   | CELt DC DC
   deriving (Show,Eq)
+  
 -- "negation" of a conditional
 inv :: Cond -> Cond
 inv (CEqu x y) = CNeq x y
@@ -40,6 +45,7 @@ data DC =
   | ClExpr Reg    -- load and execute "reg"
   | St2Reg Reg
   deriving (Show,Eq)
+
 c_dc_op Plus  = "+"
 c_dc_op Minus = "-"
 c_dc_op Mult  = "*"
