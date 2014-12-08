@@ -84,6 +84,9 @@ conv OEq x y    = Apply Plus (Int 1) (Apply Minus x y)
 conv ONeq x y   = Apply Minus x y
 conv OGt  x y   = dcif (Reg 'c') (CGt x y) (Int 0) (Int 1) -- super cool hack, (a > b) returns it the-wrong-way, 
 conv OLt  x y   = dcif (Reg 'c') (CLt x y) (Int 0) (Int 1) -- ^ same
+conv OAnd x y   = Apply Mult x y
+conv OOr  x y   = Apply Minus (Apply Plus x y) (Apply Mult x y)
+conv OXor x y   = Apply Mult (Apply Minus (Apply Plus x y) (Apply Mult x y)) (Apply Minus (Int 1) (Apply Mult x y))
 
 cpExpr :: Int -> Fun -> Expr -> State Vs DC
 cpExpr n namespace xpr =
@@ -116,6 +119,10 @@ cpExpr n namespace xpr =
        ECall (Ident x) els -> do
 	 let xs = exLst els
 	 case x of
+	    "not" ->
+	      case xs of
+		[y] -> fmap (Apply Minus (Int 1)) (cpExpr (n+1) namespace y)
+		_ -> error "not called with an invalid number of params"
 	    "println" ->
 	      case xs of
 		[y] -> fmap IOWriteNL (cpExpr (n+1) namespace y)

@@ -19,8 +19,13 @@ env = [
   ("<", TInt %> TInt %> TBool),
   ("/=", TInt %> TInt %> TBool),
   ("==", TInt %> TInt %> TBool),
+  ("||", TBool %> TBool %> TBool),
+  ("&&", TBool %> TBool %> TBool),
+  ("^",  TBool %> TBool %> TBool),
+  ("not", TBool %> TBool),
   ("_when",  TBool %> TUnit %> TUnit),
-  ("print", TInt %> TUnit),
+  ("print", TVar "a" %> TUnit),
+  ("println", TVar "a" %> TUnit),
   ("_if", TBool %> TVar "k" %> TVar "k" %> TVar "k"),
   ("read", TInt),
   ("_fix", (TVar "a" %> TVar "a") %> TVar "a")
@@ -41,6 +46,9 @@ op2v OEq    = "=="
 op2v ONeq   = "/="
 op2v OLt    = "<"
 op2v OGt    = ">"
+op2v OOr    = "||"
+op2v OAnd   = "&&"
+op2v OXor   = "^"	
 
 
 clambda :: Expr -> L.Exp

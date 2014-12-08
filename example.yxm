@@ -1,8 +1,24 @@
 module Main where
 
+-- recursion example
 fun fact(x) =
-  if x < 1
+  if (x < 1)
   then 1
   else x * fact[x-1];
 
-let main = print[fact[read]];
+-- multiple conditions
+fun mif(x) =
+  if (x == 1) then
+    42
+  else if (not[x == 2]) then
+    1337
+  else
+    9001;
+
+-- small useless functionz!
+fun sum(x,y) = x+y;
+fun double(x) = sum[x,x];
+
+fun nand(x,y) = not[x && y];
+
+let main = println[fact[read]];

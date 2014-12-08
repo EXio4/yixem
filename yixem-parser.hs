@@ -27,6 +27,9 @@ OMinus. Operator ::= "-";
 OMult.  Operator ::= "*";
 OGt.    Operator ::= ">";
 OLt.    Operator ::= "<";
+OAnd.   Operator ::= "&&";
+OOr.    Operator ::= "||";
+OXor.   Operator ::= "^";
 
 VTrue.  VBool ::= "#t";
 VFalse. VBool ::= "#f";
