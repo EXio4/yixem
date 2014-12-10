@@ -1,4 +1,5 @@
 dist
+yixem
 cabal-dev
 *.o
 *.hi

@@ -117,12 +117,10 @@ data TIEnv = TIEnv  {}
 data TIState = TIState {  tiSupply :: Int,
                           tiSubst :: Subst}
 
-type TI a = ErrorT String (ReaderT TIEnv (StateT TIState IO)) a
+type TI a = ErrorT String (ReaderT TIEnv (State TIState)) a
 
-runTI :: TI a -> IO (Either String a, TIState)
-runTI t = 
-    do (res, st) <- runStateT (runReaderT (runErrorT t) initTIEnv) initTIState
-       return (res, st)
+runTI :: TI a -> (Either String a, TIState)
+runTI t = runState (runReaderT (runErrorT t) initTIEnv) initTIState
   where initTIEnv = TIEnv{}
         initTIState = TIState{tiSupply = 0,
                               tiSubst = Map.empty}
@@ -209,11 +207,10 @@ toschm (TFun x y) =
 conv :: [(String,Type)] -> [(String,Scheme)]
 conv = map (id *** toschm)
         
-typeInf :: [(String,Type)] -> Exp -> IO (Either String Type)
-typeInf ev e = do
-  let env = Map.fromList (conv ev)
-  (res,_) <-runTI (typeInference env e)
-  return res
+typeInf :: [(String,Type)] -> Exp -> Either String Type
+typeInf ev e = res
+  where env = Map.fromList (conv ev)
+        (res,_) = runTI (typeInference env e)
 	
 
 

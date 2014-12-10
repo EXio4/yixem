@@ -33,8 +33,8 @@ env = [
 
   
 cexp :: L.Exp -> IO Bool
-cexp x = L.typeInf env x >>= \y ->
-  case y of
+cexp x = 
+  case L.typeInf env x of
        Left  z -> putStrLn ("error typechecking\n\t" ++ z) >> return False
        Right z -> return True
        
