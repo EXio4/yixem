@@ -3,7 +3,7 @@ module Yixem.Typechecker
   where
 import Debug.Trace
 import Yixem.Parser
-import Yixem.Compiler (exLst,vrLst)
+import Yixem.Helpers
 import qualified Yixem.Lambda.Typechecker as L
 import Yixem.Lambda.Typechecker (Type(..))
 
@@ -12,23 +12,23 @@ infixr 5 %>
 
 env :: [(String,Type)]
 env = [
-  ("+", TInt %> TInt %> TInt),
-  ("-", TInt %> TInt %> TInt),
-  ("*", TInt %> TInt %> TInt),
-  (">", TInt %> TInt %> TBool),
-  ("<", TInt %> TInt %> TBool),
-  ("/=", TInt %> TInt %> TBool),
-  ("==", TInt %> TInt %> TBool),
-  ("||", TBool %> TBool %> TBool),
-  ("&&", TBool %> TBool %> TBool),
-  ("^",  TBool %> TBool %> TBool),
-  ("not", TBool %> TBool),
-  ("_when",  TBool %> TUnit %> TUnit),
-  ("print", TVar "a" %> TUnit),
+  ("+",       TInt %> TInt %> TInt),
+  ("-",       TInt %> TInt %> TInt),
+  ("*",       TInt %> TInt %> TInt),
+  (">",       TInt %> TInt %> TBool),
+  ("<",       TInt %> TInt %> TBool),
+  ("/=",      TInt %> TInt %> TBool),
+  ("==",      TInt %> TInt %> TBool),
+  ("||",      TBool %> TBool %> TBool),
+  ("&&",      TBool %> TBool %> TBool),
+  ("^",       TBool %> TBool %> TBool),
+  ("not",     TBool %> TBool),
+  ("_when",   TBool %> TUnit %> TUnit),
+  ("print",   TVar "a" %> TUnit),
   ("println", TVar "a" %> TUnit),
-  ("_if", TBool %> TVar "k" %> TVar "k" %> TVar "k"),
-  ("read", TInt),
-  ("_fix", (TVar "a" %> TVar "a") %> TVar "a")
+  ("_if",     TBool %> TVar "k" %> TVar "k" %> TVar "k"),
+  ("read",    TInt),
+  ("_fix",    (TVar "a" %> TVar "a") %> TVar "a")
   ]
 
   

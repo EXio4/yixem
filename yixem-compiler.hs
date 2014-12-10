@@ -1,27 +1,18 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Yixem.Compiler (
-  compile,
-  exLst,
-  vrLst
+  compile
 ) where
 
 import Yixem.Parser
 import Yixem.CoreLang
+import Yixem.Helpers
 
 import Control.Monad.State.Strict
 import Data.List
+import Control.Applicative
 
 data Vs = Vs [(String,Reg)]
-
-exLst :: ExLst -> [Expr]
-exLst (LE x) = [x]
-exLst (EE x xs) = x:exLst xs
-
-vrLst :: Vars -> [String]
-vrLst (LV (Ident x)) = [x]
-vrLst (EV (Ident x) xs) = x:vrLst xs
-
 
 instance Show Vs where
   show (Vs x) = show $ map (\(a,(Reg b)) -> (a, b)) x
@@ -100,41 +91,39 @@ cpExpr n namespace xpr =
        EVar (Ident x) ->
 	case x of
 	  "read" -> return IORead
-	  x -> fmap LoadReg (getenv namespace x)
-       EOp e1 o e2 -> do
-	 a <- cpExpr (n+1) namespace e1
-	 b <- cpExpr (n+1) namespace e2
-	 return $ conv o a b
-       EWhen e1 e2 -> do
-	 reg <- varx ("_whencond_" ++ show n)
-	 a <- cpExpr (n+1) namespace e1
-	 b <- cpExpr (n+1) namespace e2
-	 return $ Branch reg (CEqu a (Int 1)) b
-       EIf e1 e2 e3 -> do
-	 reg <- varx ("_whencond_" ++ show n)
-	 a <- cpExpr (n+1) namespace e1
-	 b <- cpExpr (n+1) namespace e2
-	 c <- cpExpr (n+1) namespace e3
-	 return $ dcif reg (CEqu a (Int 1)) b c
-       ECall (Ident x) els -> do
-	 let xs = exLst els
+	  x -> LoadReg <$> getenv namespace x
+       EOp e1 o e2 -> 
+	 conv o <$> cpExpr (n+1) namespace e1 <*> cpExpr (n+1) namespace e2
+       EWhen e1 e2 -> 
+	 (\r a b -> Branch r (CEqu a (Int 1)) b)
+	   <$> varx ("_whencond_" ++ show n)
+	   <*> cpExpr (n+1) namespace e1
+	   <*> cpExpr (n+1) namespace e2
+       EIf e1 e2 e3 -> 
+	 (\r a b c -> dcif r (CEqu a (Int 1)) b c)
+	  <$> varx ("_whencond_" ++ show n)
+	  <*> cpExpr (n+1) namespace e1
+	  <*> cpExpr (n+1) namespace e2
+	  <*> cpExpr (n+1) namespace e3
+       ECall (Ident x) els ->
+	 let xs = exLst els in
 	 case x of
 	    "not" ->
 	      case xs of
-		[y] -> fmap (Apply Minus (Int 1)) (cpExpr (n+1) namespace y)
+		[y] ->  Apply Minus (Int 1) <$> (cpExpr (n+1) namespace y)
 		_ -> error "not called with an invalid number of params"
 	    "println" ->
 	      case xs of
-		[y] -> fmap IOWriteNL (cpExpr (n+1) namespace y)
+		[y] -> IOWriteNL <$> cpExpr (n+1) namespace y
 		_   -> error "println called with an invalid number of params"	    
 	    "print" ->
 	      case xs of
-		[y] -> fmap IOWrite (cpExpr (n+1) namespace y)
+		[y] -> IOWrite <$> cpExpr (n+1) namespace y
 		_   -> error "print called with an invalid number of params"
-	    x -> do
-	      fun <- getenv namespace x
-	      b <- mapM (cpExpr (n+1) namespace) xs
-	      return $ foldr Sequ (ClExpr fun) b
+	    x ->
+	      (\f -> foldr Sequ (ClExpr f))
+		<$> getenv namespace x
+		<*> mapM (cpExpr (n+1) namespace) xs
 	      
 	      
 compile :: Program -> String
