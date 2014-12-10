@@ -17,7 +17,7 @@ main = getArgs >>= \x ->
 		Right v ->
 		   case typecheck v of
 		      Nothing ->
-			case optimizer v of
+			case optimizer optAll v of
 			  Right v -> putStrLn ("# file: "++x) >> putStrLn (compile v)
 			  Left  e -> hPutStrLn stderr ("OPTIMIZER PHASE FAILED TO TYPECHECKER\n\n\tphase: " ++ e)
 		      Just x  -> hPutStrLn stderr ("error while typechecking\n\t" ++ x)
