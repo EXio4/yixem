@@ -13,16 +13,16 @@ import qualified Data.Set as Set
 import Control.Arrow
 import Data.List
 import Debug.Trace
-import Control.Monad.Error
+import Control.Monad.Trans.Except
 import Control.Monad.Reader
 import Control.Monad.State
 
 
 instance Show Type where
     show (TVar x) = "'" ++ x
-    show TInt     = "int"
-    show TBool    = "bool"
-    show TUnit    = "unit"
+    show TInt     = "Int"
+    show TBool    = "Bool"
+    show TUnit    = "Unit"
     show (TFun x@(TFun e1 e2) e3) = "(" ++ show x ++ ") -> " ++ show e3
     show (TFun e1 e2) = show e1 ++ " -> " ++ show e2
 
@@ -117,10 +117,10 @@ data TIEnv = TIEnv  {}
 data TIState = TIState {  tiSupply :: Int,
                           tiSubst :: Subst}
 
-type TI a = ErrorT String (ReaderT TIEnv (State TIState)) a
+type TI a = ExceptT String (ReaderT TIEnv (State TIState)) a
 
 runTI :: TI a -> (Either String a, TIState)
-runTI t = runState (runReaderT (runErrorT t) initTIEnv) initTIState
+runTI t = runState (runReaderT (runExceptT t) initTIEnv) initTIState
   where initTIEnv = TIEnv{}
         initTIState = TIState{tiSupply = 0,
                               tiSubst = Map.empty}
@@ -144,12 +144,12 @@ mgu (TVar u) t               =  varBind u t
 mgu t (TVar u)               =  varBind u t
 mgu TInt TInt                =  return nullSubst
 mgu TBool TBool              =  return nullSubst
-mgu t1 t2                    =  throwError $ "types do not unify: " ++ show t1 ++ 
+mgu t1 t2                    =  throwE $ "types do not unify: " ++ show t1 ++ 
                                 " vs. " ++ show t2
 
 varBind :: String -> Type -> TI Subst
 varBind u t  | t == TVar u           =  return nullSubst
-             | u `Set.member` ftv t  =  throwError $ "occur check fails: '" ++ u ++
+             | u `Set.member` ftv t  =  throwE $ "occur check fails: '" ++ u ++
                                          " vs. " ++ show t
              | otherwise             =  return (Map.singleton u t)
 
@@ -163,7 +163,7 @@ tiLit _ (LUnit)    =  return (nullSubst, TUnit)
 ti        ::  TypeEnv -> Exp -> TI (Subst, Type)
 ti (TypeEnv env) (EVar n) = 
     case Map.lookup n env of
-       Nothing     ->  throwError $ "unbound variable: " ++ n
+       Nothing     ->  throwE $ "unbound variable: " ++ n
        Just sigma  ->  do  t <- instantiate sigma
                            return (nullSubst, t)
 ti env (ELit l) = tiLit env l

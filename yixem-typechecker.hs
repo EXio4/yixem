@@ -32,11 +32,11 @@ env = [
   ]
 
   
-cexp :: L.Exp -> IO Bool
+cexp :: L.Exp -> Maybe String
 cexp x = 
   case L.typeInf env x of
-       Left  z -> putStrLn ("error typechecking\n\t" ++ z) >> return False
-       Right z -> return True
+       Left x -> Just x
+       Right _ -> Nothing
        
 op2v :: Operator -> String
 op2v OPlus  = "+"
@@ -75,5 +75,5 @@ stmExp (SVar (Ident v) e1) = (v,clambda e1)
 stmExp (SFun (Ident v) vs e1) = (v, add (vrLst vs) (clambda e1))
 
 
-typecheck :: Program -> IO Bool
+typecheck :: Program -> Maybe String
 typecheck = cexp . prog
