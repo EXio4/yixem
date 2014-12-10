@@ -4,7 +4,7 @@ module Main where
 fun fact(x) =
   if (x < 1)
   then 1
-  else x * fact[x-1];
+  else x * fact[x-1]
 
 -- multiple conditions
 fun mif(x) =
@@ -13,12 +13,12 @@ fun mif(x) =
   else if (not[x == 2]) then
     1337
   else
-    9001;
+    9001
 
 -- small useless functionz!
-fun sum(x,y) = x+y;
-fun double(x) = sum[x,x];
+fun sum(x,y) = x+y
+fun double(x) = sum[x,x]
 
-fun nand(x,y) = not[x && y];
+fun nand(x,y) = not[x && y]
 
-let main = println[fact[read]];
+let main = println[fact[read]]

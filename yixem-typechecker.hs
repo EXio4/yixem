@@ -1,9 +1,8 @@
 module Yixem.Typechecker
   (typecheck)
   where
-import Debug.Trace
-import Yixem.Parser
-import Yixem.Helpers
+
+import Yixem.AST
 import qualified Yixem.Lambda.Typechecker as L
 import Yixem.Lambda.Typechecker (Type(..))
 
@@ -39,41 +38,34 @@ cexp x =
        Right _ -> Nothing
        
 op2v :: Operator -> String
-op2v OPlus  = "+"
-op2v OMinus = "-"
-op2v OMult  = "*"
-op2v OEq    = "=="
-op2v ONeq   = "/="
-op2v OLt    = "<"
-op2v OGt    = ">"
-op2v OOr    = "||"
-op2v OAnd   = "&&"
-op2v OXor   = "^"	
+op2v (Internal x) = x
 
 
 clambda :: Expr -> L.Exp
-clambda (EVar (Ident x)) = L.EVar x
-clambda (ECall (Ident x) ep) = foldl L.EApp (L.EVar x) (map clambda (exLst ep))
-clambda (EWhen e1 e2)  = (L.EApp (L.EApp (L.EVar "_when") (clambda e1)) (clambda e2))
-clambda (EOp e1 op e2) = (L.EApp (L.EApp (L.EVar (op2v op)) (clambda e1)) (clambda e2))
-clambda EBool{}        = L.ELit (L.LBool undefined)
-clambda ELit{}         = L.ELit (L.LInt  undefined)
-clambda EUnit          = L.ELit L.LUnit
-clambda (EIf c e1 e2)  = (L.EApp (L.EApp (L.EApp (L.EVar "_if") (clambda c)) (clambda e1)) (clambda e2))
+clambda (Var x) = L.EVar x
+clambda (Prefix x ep) = foldl L.EApp (L.EVar x) (map clambda ep)
+clambda (When e1 e2)  = (L.EApp (L.EApp (L.EVar "_when") (clambda e1)) (clambda e2))
+clambda (InfixC e1 op e2) = (L.EApp (L.EApp (L.EVar (op2v op)) (clambda e1)) (clambda e2))
+clambda (Lit n) = L.ELit $
+  case n of
+       Number n -> L.LInt n
+       Bool   n -> L.LBool n
+       Unit     -> L.LUnit
+clambda (If c e1 e2)  = (L.EApp (L.EApp (L.EApp (L.EVar "_if") (clambda c)) (clambda e1)) (clambda e2))
 
 wrap :: (String,L.Exp) -> L.Exp -> L.Exp
 wrap (s,e) r = L.ELet s (L.EApp (L.EVar "_fix") (L.EAbs s e)) r
 
-prog :: Program -> L.Exp
-prog (Prog (Ident m) xs) = foldr wrap (L.EVar "main") (map stmExp xs)
+prog :: Module -> L.Exp
+prog (Module m xs) = foldr wrap (L.EVar "main") (map defExp xs)
 
 add :: [String] -> L.Exp -> L.Exp
 add xs d = foldr L.EAbs d xs
 
-stmExp :: Stm -> (String, L.Exp)
-stmExp (SVar (Ident v) e1) = (v,clambda e1)
-stmExp (SFun (Ident v) vs e1) = (v, add (vrLst vs) (clambda e1))
+defExp :: Definition -> (String, L.Exp)
+defExp (DLet v e1)    = (v,clambda e1)
+defExp (DFun v vs e1) = (v, add vs (clambda e1))
 
 
-typecheck :: Program -> Maybe String
+typecheck :: Module -> Maybe String
 typecheck = cexp . prog

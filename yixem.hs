@@ -1,6 +1,8 @@
 module Main (main) where
 
 import Yixem.Parser
+import Yixem.AST
+import Yixem.Helpers
 import Yixem.Compiler
 import Yixem.Typechecker
 import Yixem.Optimizer
@@ -14,7 +16,8 @@ main = getArgs >>= \x ->
   case x of
        [x] -> readFile x >>= \y ->
 	  case parserX y of
-		Right v ->
+		Right w ->
+		   let v = prog w in 
 		   case typecheck v of
 		      Nothing ->
 			case optimizer optAll v of

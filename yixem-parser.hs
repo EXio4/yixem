@@ -11,8 +11,8 @@ antiquote "[" ":" ":]";
 LV.   Vars ::= Ident ;
 EV.   Vars ::= Ident "," Vars ;
 
-SVar.  Stm ::= "let" Ident "=" Expr ";";
-SFun.  Stm ::= "fun" Ident  "(" Vars ")" "=" Expr ";";
+SVar.  Stm ::= "let" Ident "=" Expr;
+SFun.  Stm ::= "fun" Ident  "(" Vars ")" "=" Expr;
 
 [].       [Stm]    ::= ;
 (:).      [Stm]    ::= Stm [Stm];
@@ -40,6 +40,7 @@ EE.   ExLst ::= Expr "," ExLst ;
 
 
 ECall.  Expr1 ::= Ident "[" ExLst "]";
+ELet.   Expr1 ::= "let" Ident "=" Expr "in" Expr;
 EIf.    Expr2 ::= "if" Expr2 "then" Expr0 "else" Expr0;
 EWhen.  Expr2 ::= "when" Expr2 "then" Expr0;
 EOp.    Expr3 ::= Expr3 Operator Expr1;
