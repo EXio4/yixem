@@ -12,7 +12,6 @@ import qualified Data.Set as Set
 
 import Control.Arrow
 import Data.List
-import Debug.Trace
 import Control.Monad.Trans.Except
 import Control.Monad.Reader
 import Control.Monad.State

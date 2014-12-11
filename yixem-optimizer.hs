@@ -2,6 +2,7 @@ module Yixem.Optimizer (
   Priority,
   optNone,
   optAll,
+  ErrOpt(..),
   optimizer
 ) where
 
@@ -11,6 +12,7 @@ import Yixem.Optimizer.Types
 
 -- phases
 import Yixem.Optimizer.LambdaLift
+import Yixem.Optimizer.ShadowElim
 
 import Data.Foldable
 import Control.Monad.Trans.Except
@@ -18,15 +20,22 @@ import Control.Applicative
 
 phases :: [CompilerPhase]
 phases = [
+    shadowelim,
     lambdalift
   ]
+  
+data ErrOpt = ErrOpt {
+    errPhaseName :: String,
+    errTypeError :: String,
+    errGenProg   :: Module
+  } deriving (Show,Eq)
 
-runPhase :: Module -> CompilerPhase -> Except String Module
+runPhase :: Module -> CompilerPhase -> Except ErrOpt Module
 runPhase p (CPhase _ n f) =
   let newp = f p in
   case typecheck newp of
     Nothing -> return newp
-    Just _  -> throwE n
+    Just x  -> throwE (ErrOpt n x newp)
 
-optimizer :: Priority -> Module -> Either String Module
+optimizer :: Priority -> Module -> Either ErrOpt Module
 optimizer n p = runExcept $ foldlM runPhase p (filter (\x -> phasePriority x <= n) phases)

@@ -1,0 +1,23 @@
+module Main where
+
+let test1 =
+  let x = 2 in
+  let y = 2 in
+  x+y
+
+let test2 =
+  let x = test1 in
+  let y = x in
+  y
+
+let test3 = 
+  let x = (let y = test2 in y) in
+  x
+
+let test4 =
+  let x = 2 in
+  let x = x+1 in
+  let x = x+2 in
+  x
+
+let main = println[test3]

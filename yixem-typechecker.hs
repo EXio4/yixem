@@ -43,6 +43,7 @@ op2v (Internal x) = x
 
 clambda :: Expr -> L.Exp
 clambda (Var x) = L.EVar x
+clambda (Let xs e) = foldr (\(s,b) r -> L.ELet s (clambda b) r) (clambda e) xs
 clambda (Prefix x ep) = foldl L.EApp (L.EVar x) (map clambda ep)
 clambda (When e1 e2)  = (L.EApp (L.EApp (L.EVar "_when") (clambda e1)) (clambda e2))
 clambda (InfixC e1 op e2) = (L.EApp (L.EApp (L.EVar (op2v op)) (clambda e1)) (clambda e2))

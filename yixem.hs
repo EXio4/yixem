@@ -22,7 +22,11 @@ main = getArgs >>= \x ->
 		      Nothing ->
 			case optimizer optAll v of
 			  Right v -> putStrLn ("# file: "++x) >> putStrLn (compile v)
-			  Left  e -> hPutStrLn stderr ("OPTIMIZER PHASE FAILED TO TYPECHECKER\n\n\tphase: " ++ e)
+			  Left (ErrOpt ph err prog) -> do
+			    hPutStrLn stderr $ "OPTIMIZER PHASE FAILED TO TYPECHECKER\n\n"
+			    hPutStrLn stderr $ "\tphase: " ++ ph ++ "\n\n"
+			    hPutStrLn stderr $ "\ttype error:  " ++ err ++ "\n\n"
+			    hPutStrLn stderr $ "\t[[generated program]]\n" ++ show prog
 		      Just x  -> hPutStrLn stderr ("error while typechecking\n\t" ++ x)
 		Left  x -> putStrLn "Error parsing file" >> putStrLn x
        _   -> putStrLn "give it exactly one param (the file to compile)"

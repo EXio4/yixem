@@ -1,0 +1,10 @@
+module Main where
+
+
+let shadow =
+  let y = 1 in
+  let y = y+2 in
+  let y = y*4 in
+  y
+
+let main = println[shadow]
