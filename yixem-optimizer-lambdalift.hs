@@ -63,7 +63,10 @@ ldef (DLet x e) =
   case e of
        Let xs r -> rep x xs r
        w        -> [DLet x e]
-ldef w = [w]
+ldef (DFun x xs e) =
+  case e of
+       Let xs r -> rep x xs r
+       w        -> [DFun x xs e]
 	      
 lambdalift :: CompilerPhase
 lambdalift = CPhase optNone "lambda-lifting" trans

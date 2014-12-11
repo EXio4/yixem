@@ -13,6 +13,7 @@ import Yixem.Optimizer.Types
 -- phases
 import Yixem.Optimizer.LambdaLift
 import Yixem.Optimizer.ShadowElim
+import Yixem.Optimizer.VarTracker
 
 import Data.Foldable
 import Control.Monad.Trans.Except
@@ -21,7 +22,8 @@ import Control.Applicative
 phases :: [CompilerPhase]
 phases = [
     shadowelim,
-    lambdalift
+    lambdalift,
+    vartracker
   ]
   
 data ErrOpt = ErrOpt {

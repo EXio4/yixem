@@ -44,6 +44,7 @@ data DC =
   | SvExpr Reg DC -- save expression into "reg" 
   | ClExpr Reg    -- load and execute "reg"
   | St2Reg Reg
+  | NOOP
   deriving (Show,Eq)
 
 c_dc_op Plus  = "+"
@@ -66,6 +67,7 @@ dcif r c e1 e2 =  Sequ
   
 
 c_dc :: DC -> String
+c_dc (NOOP)           = ""
 c_dc (IORead)         = "?"
 c_dc (IOWrite   e)    = c_dc e ++ " n"
 c_dc (IOWriteNL e)    = c_dc e ++ " p sv"

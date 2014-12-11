@@ -49,14 +49,16 @@ cpProgram (Module m defs) = do
   prog <- mapM (cpDefs m) defs
   let namespace = Function (m,"global") []
   x <- getenv namespace "main"  
-  return $ foldr Sequ (ClExpr x) prog
+  return $ foldr Sequ NOOP prog
 
 cpDefs :: String -> Definition -> State Vs DC
 cpDefs m (DLet x expr) = do
   let namespace = Function (m,x) []
   fun  <- getenv namespace x
   body <- cpExpr 0 namespace expr
-  return $ SvExpr fun body
+  return $
+    Sequ (SvExpr fun body) 
+         (SaveReg fun (ClExpr fun))
 cpDefs m (DFun x vx expr) = do
   let namespace = Function (m,x) vx
   fun <- getenv namespace x
