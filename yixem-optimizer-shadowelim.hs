@@ -28,6 +28,7 @@ go (Let ((s,e1):xs) e2) = Let [(s,e1)] (go (subst s s (Let xs e2)))
 go (If e1 e2 e3) = If (go e1) (go e2) (go e3)
 go (When e1 e2)  = When (go e1) (go e2)
 go (Var x) = Var x
+go (Lit n) = Lit n
 go (Prefix x xs) = Prefix x (map go xs)
 go (InfixC e1 o e2) = InfixC (go e1) o (go e2)
     
